@@ -1,0 +1,129 @@
+import sqlite3
+
+def select(nameOfTable):
+    cur.execute('''select * from ''' + nameOfTable)
+    Result = cur.fetchall()
+    print(Result)
+
+def info():
+    print('1)_group')
+    print('2)bill')
+    print('3)user')
+    print('4)group_user')
+    print('5)bill_user_owes')
+    print('6)bill_user_paid')
+    print('7)note')
+
+con = sqlite3.connect('Test.db')
+
+cur = con.cursor()
+
+cur.execute('''create table if not exists _group 
+(
+id integer primary key autoincrement,
+name text,
+balance integer
+);''')
+
+cur.execute('''create table if not exists bill 
+(
+id integer primary key autoincrement,
+id_group integer references _group (id),
+title text,
+amount integer,
+date text,
+created_by text
+);''')
+
+cur.execute('''create table if not exists user 
+(
+id integer primary key autoincrement,
+name text,
+email text,
+member_Since text,
+avatar text
+);''')
+
+cur.execute('''create table if not exists group_user 
+(
+id integer primary key autoincrement,
+id_group integer references _group (id),
+id_user integer references User(id),
+balance integer
+);''')
+
+cur.execute('''create table if not exists bill_user_owes 
+(
+id integer primary key autoincrement,
+id_bill integer references Bill (id),
+id_user integer references User(id),
+owes integer
+);''')
+
+cur.execute('''create table if not exists bill_user_paid 
+(
+id integer primary key autoincrement,
+id_bill integer references Bill (id),
+id_user integer references User(id),
+Paid integer
+);''')
+
+cur.execute('''create table if not exists note 
+(
+id integer primary key autoincrement,
+id_bill integer references Bill (id),
+id_user integer references User(id),
+message text,
+created text
+);''')
+
+con.commit()
+
+while True:
+    print('Что хотите делать: вводить данные (1) или выводить их(2)?')
+    print('1) Ввод')
+    print('2) Вывод')
+    F = int(input())
+    if F == 1:
+        print('Какую таблицу будем заполнять?')
+        info()
+        K = int(input())
+        if K == 1:
+            cur.execute('''insert into _group (name,balance) values ((?),(?))''',(input(),input()))
+        elif K == 2:
+            cur.execute('''insert into bill (id_group,title,amount,date,created_by) values ((?),(?),(?),(?),(?))''', (input(), input(), input(), input(), input()))
+        elif K == 3:
+            cur.execute('''insert into user (name,email,member_since,avatar) values ((?),(?),(?),(?))''', (input(), input(), input(), input()))
+        elif K == 4:
+            cur.execute('''insert into group_user (id_group,id_user,balance) values ((?),(?),(?))''', (input(), input(), input()))
+        elif K == 5:
+            cur.execute('''insert into bill_user_owes (id_bill,id_user,owes) values ((?),(?),(?))''', (input(), input(), input()))
+        elif K == 6:
+            cur.execute('''insert into bill_user_paid (id_bill,id_user,paid) values ((?),(?),(?))''', (input(), input(), input()))
+        elif K == 7:
+            cur.execute('''insert into note (id_bill,id_user,message,created) values ((?),(?),(?),(?))''', (input(), input(), input(),input()))
+    elif F == 2:
+        print('Какую таблицу нужно вывисти?')
+        info()
+        K = int(input())
+        if K == 1:
+            select('_group')
+        elif K == 2:
+            select('bill')
+        elif K == 3:
+            select('user')
+        elif K == 4:
+            select('group_user')
+        elif K == 5:
+            select('bill_user_owes')
+        elif K == 6:
+            select('bill_user_paid')
+        elif K == 7:
+            select('note')
+        else:
+            print('Такой таблицы нет!!!')
+    else:
+        print('Нужно было выбрать 1 или 2 а не ' + F)
+    con.commit()
+
+con.close()
